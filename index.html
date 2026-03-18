@@ -1609,7 +1609,7 @@
         <section class="bannerVideo mb-4 position-relative w-100 overflow-hidden">
             <div class="video-preloader"></div>
             <video class="banner-video d-none d-md-block" autoplay muted loop playsinline preload="metadata"
-                poster="http://www.staging9.zaynah.co.uk/wp-content/uploads/2026/03/desktop-poster.jpg">
+                poster="https://www.staging9.zaynah.co.uk/wp-content/uploads/2026/03/desktop-poster.jpg">
                 <source src="https://www.staging9.zaynah.co.uk/wp-content/uploads/2026/03/desktop-hero.mp4"
                     type="video/mp4">
                 Your browser does not support the video tag.
@@ -1684,9 +1684,43 @@
 
                         // Ensure the video is set to autoplay and muted
                         if (video) {
+                            let hidePreloader = false;
+
+                            // Timeout to hide preloader after 10 seconds (fallback)
+                            const preloaderTimeout = setTimeout(function () {
+                                if (!hidePreloader) {
+                                    console.warn('Video failed to load within 10 seconds. Hiding preloader.');
+                                    preloader.fadeOut(300);
+                                    hidePreloader = true;
+                                }
+                            }, 10000);
+
+                            // Hide preloader when video data is loaded
                             video.addEventListener('loadeddata', function () {
-                                preloader.fadeOut(300);
+                                clearTimeout(preloaderTimeout);
+                                if (!hidePreloader) {
+                                    preloader.fadeOut(300);
+                                    hidePreloader = true;
+                                }
                             });
+
+                            // Hide preloader on video error
+                            video.addEventListener('error', function () {
+                                clearTimeout(preloaderTimeout);
+                                console.error('Video loading error. Error code:', video.error.code);
+                                preloader.fadeOut(300);
+                                hidePreloader = true;
+                            });
+
+                            // Hide preloader when video starts playing
+                            video.addEventListener('play', function () {
+                                clearTimeout(preloaderTimeout);
+                                if (!hidePreloader) {
+                                    preloader.fadeOut(300);
+                                    hidePreloader = true;
+                                }
+                            });
+
                             video.autoplay = true;
                             video.muted = true;
 
